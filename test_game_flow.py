@@ -4,7 +4,8 @@ No camera needed.
 Run with:  python -m pytest -v
 """
 from src.config import (COUNTDOWN_SECONDS, DWELL_SECONDS, PAPER, RESULT_SECONDS,
-                        ROCK, SCISSORS, START_HOLD_SECONDS, UNKNOWN)
+                        POINTER_HOLD_SECONDS, ROCK, SCISSORS,
+                        START_HOLD_SECONDS, UNKNOWN)
 from src.game_controller import GameController, State
 from src.game_rules import LOSE
 from src.hand_pointer import (Button, DwellClicker, Pointer,
@@ -42,9 +43,45 @@ def test_no_hand_gives_no_fingertip():
 
 def test_pointer_maps_to_screen_and_clamps():
     p = Pointer(1000, 600, margin=0.1, smoothing=1.0)
-    assert p.update((0.5, 0.5)) == (500.0, 300.0)
-    assert p.update((0.0, 1.0)) == (0.0, 600.0)      # edge is clamped
-    assert p.update(None) is None
+    assert p.update((0.5, 0.5), now=0.0) == (500.0, 300.0)
+    assert p.update((0.0, 1.0), now=0.1) == (0.0, 600.0)  # edge is clamped
+    assert p.update(None, now=0.1 + POINTER_HOLD_SECONDS + 0.01) is None
+
+
+def test_pointer_filter_reduces_stationary_jitter():
+    import random
+    import statistics
+
+    pointer = Pointer(1000, 1000, margin=0.0)
+    randomizer = random.Random(7)
+    raw_x = []
+    filtered_x = []
+    for frame in range(120):
+        x = 0.5 + randomizer.uniform(-0.01, 0.01)
+        raw_x.append(x)
+        filtered_x.append(pointer.update((x, 0.5), now=frame / 60)[0] / 1000)
+
+    assert statistics.pstdev(filtered_x[10:]) < statistics.pstdev(raw_x[10:])
+
+
+def test_pointer_filter_follows_a_fast_move():
+    pointer = Pointer(1000, 1000, margin=0.0)
+    pointer.update((0.3, 0.5), now=0.0)
+
+    x, _ = pointer.update((0.8, 0.5), now=0.1)
+
+    assert x > 700
+
+
+def test_pointer_holds_position_and_resets_after_hold_expires():
+    pointer = Pointer(1000, 1000, margin=0.0, smoothing=1.0)
+    last_position = pointer.update((0.4, 0.4), now=0.0)
+
+    assert pointer.update(None, now=0.2) == last_position
+    assert pointer.update((0.8, 0.8), now=0.21) == (800.0, 800.0)
+    assert pointer.update(None, now=0.3) == (800.0, 800.0)
+    assert pointer.update(None, now=0.21 + POINTER_HOLD_SECONDS + 0.01) is None
+    assert pointer.update((0.2, 0.2), now=0.5) == (200.0, 200.0)
 
 
 # ---------------- one-second click ----------------

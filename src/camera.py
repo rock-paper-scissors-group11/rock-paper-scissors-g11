@@ -29,8 +29,24 @@ class Camera:
                 self.cap = None
                 return False
 
-            self.cap.set(cv2.CAP_PROP_FRAME_WIDTH, config.FRAME_WIDTH)
-            self.cap.set(cv2.CAP_PROP_FRAME_HEIGHT, config.FRAME_HEIGHT)
+            settings = (
+                (cv2.CAP_PROP_FRAME_WIDTH, config.FRAME_WIDTH),
+                (cv2.CAP_PROP_FRAME_HEIGHT, config.FRAME_HEIGHT),
+                (cv2.CAP_PROP_BUFFERSIZE, 1),
+                (cv2.CAP_PROP_FPS, 30),
+            )
+            for property_id, value in settings:
+                try:
+                    self.cap.set(property_id, value)
+                except Exception:
+                    pass
+            try:
+                self.cap.set(
+                    cv2.CAP_PROP_FOURCC,
+                    cv2.VideoWriter_fourcc(*"MJPG"),
+                )
+            except Exception:
+                pass
             return True
         except Exception as error:  # never crash because of the camera
             print(f"[Camera] Could not open camera: {error}")

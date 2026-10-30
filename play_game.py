@@ -11,6 +11,7 @@ import cv2
 import numpy as np
 
 from src.camera import Camera
+from src import config
 from src.config import DWELL_SECONDS, FULLSCREEN, UNKNOWN
 from src.audio import AudioManager
 from src.game_controller import GameController, State
@@ -158,13 +159,20 @@ def main() -> None:
         cv2.WINDOW_FULLSCREEN if fullscreen else cv2.WINDOW_NORMAL,
     )
     print("Select Start Game to open the menu. Q = quit.")
+    perf_started = time.perf_counter()
+    perf_frames = 0
+    perf_totals = {"camera.read": 0.0, "tracker.detect": 0.0,
+                   "renderer.draw": 0.0, "loop": 0.0}
 
     try:
         while view != "QUIT":
+            loop_started = time.perf_counter() if config.DEBUG_PERF else None
             now = time.monotonic()
             window_rect = cv2.getWindowImageRect(WINDOW)
             window_w, window_h = window_rect[2], window_rect[3]
+            camera_started = None
             if camera_available:
+                camera_started = time.perf_counter() if config.DEBUG_PERF else None
                 frame = camera.read()
                 if frame is None:
                     failed_camera_frames += 1
@@ -182,7 +190,12 @@ def main() -> None:
                     if not camera_available:
                         next_camera_retry = time.monotonic() + 2.0
 
+            if camera_started is not None:
+                perf_totals["camera.read"] += time.perf_counter() - camera_started
+            tracker_started = time.perf_counter() if config.DEBUG_PERF else None
             landmarks = tracker.detect(frame) if tracker is not None and frame is not None else None
+            if tracker_started is not None:
+                perf_totals["tracker.detect"] += time.perf_counter() - tracker_started
             if tracker is not None and frame is not None:
                 tracker.draw(frame, landmarks)
             raw = UNKNOWN if landmarks is None else classify(landmarks)
@@ -194,7 +207,7 @@ def main() -> None:
                 fingertip = index_tip_normalized(landmarks, frame_w, frame_h)
             else:
                 fingertip = None
-            cursor = pointer.update(fingertip)
+            cursor = pointer.update(fingertip, now)
             buttons = buttons_for(game, view)
 
             action = clicker.update(cursor, buttons, now)
@@ -233,10 +246,13 @@ def main() -> None:
             last_game_state = game.state
 
             buttons = buttons_for(game, view)
+            renderer_started = time.perf_counter() if config.DEBUG_PERF else None
             screen = renderer.draw(
                 game, frame, raw, view, buttons, cursor, clicker, now,
                 audio.enabled, audio.volume, camera_available, audio.available,
             )
+            if renderer_started is not None:
+                perf_totals["renderer.draw"] += time.perf_counter() - renderer_started
             window_rect = cv2.getWindowImageRect(WINDOW)
             window_w, window_h = window_rect[2], window_rect[3]
             fitted = fit_scale(WIDTH, HEIGHT, window_w, window_h)
@@ -263,6 +279,25 @@ def main() -> None:
                 )
             if cv2.getWindowProperty(WINDOW, cv2.WND_PROP_VISIBLE) < 1:
                 break
+            if loop_started is not None:
+                perf_frames += 1
+                perf_totals["loop"] += time.perf_counter() - loop_started
+                elapsed = time.perf_counter() - perf_started
+                if elapsed >= 1.0:
+                    averages = {
+                        name: total * 1000.0 / perf_frames
+                        for name, total in perf_totals.items()
+                    }
+                    print(
+                        f"[PERF] FPS: {perf_frames / elapsed:.1f} | "
+                        f"camera.read: {averages['camera.read']:.2f} ms | "
+                        f"tracker.detect: {averages['tracker.detect']:.2f} ms | "
+                        f"renderer.draw: {averages['renderer.draw']:.2f} ms | "
+                        f"loop: {averages['loop']:.2f} ms"
+                    )
+                    perf_started = time.perf_counter()
+                    perf_frames = 0
+                    perf_totals = {name: 0.0 for name in perf_totals}
     finally:
         camera.release()
         if tracker is not None:
