@@ -1,70 +1,190 @@
-# HandPlay
+✋ HandPlay — Rock Paper Scissors
+A desktop Rock Paper Scissors game powered by computer vision and hand gesture recognition.
+HandPlay is an interactive game that uses Python, OpenCV, and MediaPipe to recognize hand gestures through a webcam. Players can interact with the game using hand gestures or mouse controls, making gameplay more accessible and engaging.
+The project demonstrates how computer vision and real-time hand tracking can be used to create an interactive gaming experience.
+📌 Table of Contents
+About the Project (https://chatgpt.com/c/6ae3e99f-23fc-83ec-8310-cace5824fcec#-about-the-project)
+Objectives (https://chatgpt.com/c/6ae3e99f-23fc-83ec-8310-cace5824fcec#-objectives)
+Features (https://chatgpt.com/c/6ae3e99f-23fc-83ec-8310-cace5824fcec#-features)
+Technologies Used (https://chatgpt.com/c/6ae3e99f-23fc-83ec-8310-cace5824fcec#-technologies-used)
+Requirements (https://chatgpt.com/c/6ae3e99f-23fc-83ec-8310-cace5824fcec#-requirements)
+Installation (https://chatgpt.com/c/6ae3e99f-23fc-83ec-8310-cace5824fcec#-installation)
+How to Run (https://chatgpt.com/c/6ae3e99f-23fc-83ec-8310-cace5824fcec#-how-to-run)
+How to Play (https://chatgpt.com/c/6ae3e99f-23fc-83ec-8310-cace5824fcec#-how-to-play)
+Hand Gesture Controls (https://chatgpt.com/c/6ae3e99f-23fc-83ec-8310-cace5824fcec#-hand-gesture-controls)
+Project Structure (https://chatgpt.com/c/6ae3e99f-23fc-83ec-8310-cace5824fcec#-project-structure)
+Running Tests (https://chatgpt.com/c/6ae3e99f-23fc-83ec-8310-cace5824fcec#-running-tests)
+Browser Version (https://chatgpt.com/c/6ae3e99f-23fc-83ec-8310-cace5824fcec#-browser-version)
+Known Limitations (https://chatgpt.com/c/6ae3e99f-23fc-83ec-8310-cace5824fcec#-known-limitations)
+Team Members (https://chatgpt.com/c/6ae3e99f-23fc-83ec-8310-cace5824fcec#-team-members)
+Future Improvements (https://chatgpt.com/c/6ae3e99f-23fc-83ec-8310-cace5824fcec#-future-improvements)
+License (https://chatgpt.com/c/6ae3e99f-23fc-83ec-8310-cace5824fcec#-license)
+🎮 About the Project
+HandPlay is a computer-based Rock Paper Scissors game developed as a team project.
+Instead of relying only on traditional controls, the game uses a webcam to detect hand landmarks and recognize the player's gestures. The computer selects its own move, and the game determines the result using the standard Rock Paper Scissors rules.
+The project combines game logic, hand tracking, gesture classification, score management, and a graphical interface in a desktop application.
+🎯 Objectives
+Develop an interactive Rock Paper Scissors game using Python.
+Apply computer vision to detect and track hand movements.
+Recognize Rock, Paper, and Scissors hand gestures.
+Allow players to interact with game menus and controls.
+Practice teamwork, programming, debugging, and software testing.
+✨ Features
+Hand Gesture Recognition: Detect hand landmarks using MediaPipe and OpenCV.
+Real-Time Webcam Tracking: Track the player's hand through a connected camera.
+Interactive Game Interface: Navigate game screens using hand gestures or mouse clicks.
+Dwell-to-Click Interaction: Select a button by keeping the hand cursor over it for approximately one second.
+Three-Second Countdown: Prepare for each round before making a move.
+Player vs. Computer: Play against a computer-controlled opponent.
+Automatic Scoring: Record round results and determine the match winner.
+Game History: View recorded moves and results.
+Settings: Access available sound and volume controls.
+Pause and Resume: Use the available game controls to pause or continue a match.
+Browser Version: Run the separate browser interface using the provided local server script.
+Automated Tests: Test important game rules, gesture recognition, scoring, and interface behavior.
+🛠 Technologies Used
+Technology
+Purpose
+Python 3.11
+Main programming language
+OpenCV
+Webcam input, image processing, and desktop window display
+MediaPipe
+Hand landmark detection
+NumPy
+Image and numerical processing
+Pillow
+Image-processing support
+pytest
+Automated testing
+HTML, CSS, JavaScript
+Separate browser version
+💻 Requirements
+Before installing HandPlay, make sure you have:
+Python 3.11 installed.
+A webcam for hand gesture controls.
+A working internet connection to install the required Python packages.
+Git installed if you want to clone the repository.
+The Python dependencies are listed in requirements.txt.
+📥 Installation
+Step 1: Clone the repository
+Open a terminal or command prompt and run:
+git clone https://github.com/rock-paper-scissors-group11/rock-paper-scissors-g11.git
+Step 2: Enter the project folder
+cd rock-paper-scissors-g11
+Step 3: Create a virtual environment (recommended)
+python -m venv .venv
+Activate it on Windows:
+.venv\Scripts\activate
+On macOS or Linux:
+source .venv/bin/activate
+Step 4: Install dependencies
+python -m pip install -r requirements.txt
+▶️ How to Run
+Desktop game
+From the project root, run:
+python main.py
+The game opens in a desktop window. If the webcam is available, the game can use it for hand tracking.
+Keyboard shortcuts:
+Q — Quit the game.
+F — Toggle fullscreen mode.
+Browser version
+HandPlay also includes a separate browser version.
+Start its local server from the project root:
+python start_web.py
 
-HandPlay is a desktop Rock Paper Scissors game that uses OpenCV and MediaPipe to read hand gestures from a webcam, with on-screen and mouse controls available for playing.
-
-## Requirements
-
-- Python 3.11
-- A webcam for gesture controls
-- OpenCV, MediaPipe, NumPy, and Pillow (listed in `requirements.txt`)
-- pytest to run the automated tests
-
-## Installation
-
-From the project root, install the project requirements:
-
-```sh
-pip install -r requirements.txt
-```
-
-## How to play
-
-Run `python main.py` from the project root. Select **Start Game** using the mouse or hold the hand cursor over a button for 1 second. Each round has a 3-second countdown; show a move during capture or select a move button. The first player to win 3 rounds wins the match; draws are recorded but do not increase either player's score.
-
-## Gestures
-
-- **Rock:** no recognized fingers extended.
-- **Paper:** three or four recognized fingers extended.
-- **Scissors:** index and middle fingers extended, with ring finger and pinky folded.
-
-See the [gesture guide](docs/gesture-guide.md) for classifier details and tips.
-
-## Project structure
-
-- `main.py`, `play_game.py` — desktop game entry point and interface.
-- `src/` — camera, hand tracking, gesture processing, game state, scoring, and rendering modules.
-- `tests/` — automated tests.
-- `scripts/` — optional camera and hand-tracking diagnostic scripts.
-- `docs/` — architecture, state, gesture, and measurement documentation.
-- `index.html`, `app.js`, `styles.css` — browser version.
-
-## Design documentation
-
-- [Architecture](docs/architecture.md)
-- [Game state diagram](docs/state-diagram.md)
-
-## Tests and camera measurements
-
-Run the automated tests with:
-
-```sh
+Then follow the local address displayed in your terminal to open the browser version.
+The browser version is separate from the desktop game.
+🕹 How to Play
+Start the desktop game using python main.py.
+Select Start Game to enter the game menu.
+Start a match using the available controls.
+Wait for the three-second countdown.
+Show a Rock, Paper, or Scissors gesture during the capture phase, or select a move button.
+Wait for the game to recognize your move and reveal the result.
+Continue playing until either the player or computer wins three rounds.
+Start another match when the current match ends.
+A draw is recorded but does not increase either player's score.
+✋ Hand Gesture Controls
+HandPlay recognizes the following gestures:
+Move
+Gesture
+Rock
+No recognized fingers extended
+Paper
+Three or four recognized fingers extended
+Scissors
+Index and middle fingers extended, with ring finger and pinky folded
+Hand cursor interaction
+Position your hand where the webcam can see it clearly.
+Use your index fingertip to move the on-screen hand cursor.
+Keep the cursor over a button for approximately one second to select it.
+You can also use mouse clicks and the available move buttons.
+Tip: Use good lighting and keep your hand within the webcam's view to improve gesture recognition.
+📁 Project Structure
+rock-paper-scissors-g11/
+│
+├── assets/                  # Project assets
+├── src/                     # Core game modules
+├── main.py                  # Desktop game entry point
+├── play_game.py             # Main game interface and loop
+├── requirements.txt         # Python dependencies
+├── pytest.ini               # Test configuration
+│
+├── test_click_ui.py         # UI interaction tests
+├── test_game_flow.py        # Game flow tests
+├── test_gestures.py         # Gesture recognition tests
+├── test_hand_tracker.py     # Hand tracking tests
+├── test_rules.py            # Game rules tests
+├── test_score.py            # Scoring tests
+├── test_stabilizer.py       # Gesture stabilization tests
+├── test_window_scaling.py   # Window scaling tests
+│
+├── architecture.md          # Architecture documentation
+├── state-diagram.md         # Game state diagram
+├── gesture-guide.md         # Gesture-related documentation file
+│
+├── index.html               # Browser version
+├── app.js                   # Browser application logic
+├── styles.css               # Browser styles
+├── start_web.py             # Browser version launcher
+│
+└── README.md                # Project documentation
+This tree highlights the main files; the repository may contain additional files and subfolders.
+🧪 Running Tests
+HandPlay includes automated tests for important parts of the application.
+Run the test suite from the project root:
 python -m pytest
-```
+The tests cover areas such as:
+Game rules and round outcomes.
+Score management.
+Gesture classification and stabilization.
+Hand tracking.
+Game flow and user interface interactions.
+Window scaling.
+Review the test output to see which tests pass or fail in your environment.
+📚 Documentation
+Additional project documentation is available in the repository:
+Architecture (https://chatgpt.com/c/architecture.md)
+Game State Diagram (https://chatgpt.com/c/state-diagram.md)
+⚠️ Known Limitations
+Hand gesture recognition can be affected by poor lighting, hand position, distance, and visibility.
+A working webcam is required for hand gesture controls.
+When multiple hands are detected, the application selects the hand with the largest normalized bounding box as its primary hand.
+Desktop sound support depends on the operating system; the current implementation's sound controls use Windows-specific functionality.
+The browser version is a separate implementation from the desktop game.
+👥 Team Members
+This project was developed collaboratively by Group 11.
+Add each team member's name and actual contribution below:
+[Team Member 1] — [ KHORN MI ]
+[Team Member 2] — [ YA DAVID ]
+[Team Member 3] — [ KOY SOKYI ]
 
-To measure gesture accuracy and average FPS under your lighting, run:
-
-```sh
-python -m scripts.measure_accuracy
-```
-
-The script asks for the lighting condition, then records 20 trials each for Rock, Paper, and Scissors. It prints and appends the actual run results to `docs/measured_results.md`; it does not estimate camera accuracy or FPS.
-
-## Known limitations
-
-- Desktop sound uses the Windows Media Control Interface and is available on Windows only.
-- When multiple hands are detected, the game uses the hand with the largest normalized bounding box as its primary hand.
-- Lighting, hand distance, and visibility can affect gesture recognition.
-
-## Browser version
-
-The browser version uses `index.html`, `app.js`, and `styles.css`. Start its local server with `python start_web.py`.
+🚀 Future Improvements
+Potential improvements for future versions include:
+Improve gesture recognition in different lighting conditions.
+Improve hand cursor accuracy and button selection responsiveness.
+Add more customization options.
+Expand automated testing.
+Improve compatibility across operating systems.
+These are possible future improvements, not claims about existing features.
