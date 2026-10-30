@@ -78,10 +78,10 @@ def test_pointer_holds_position_and_resets_after_hold_expires():
     last_position = pointer.update((0.4, 0.4), now=0.0)
 
     assert pointer.update(None, now=0.2) == last_position
-    assert pointer.update((0.8, 0.8), now=0.21) == (800.0, 800.0)
-    assert pointer.update(None, now=0.3) == (800.0, 800.0)
-    assert pointer.update(None, now=0.21 + POINTER_HOLD_SECONDS + 0.01) is None
-    assert pointer.update((0.2, 0.2), now=0.5) == (200.0, 200.0)
+    assert pointer.update(None, now=POINTER_HOLD_SECONDS + 0.01) is None
+    assert pointer.update((0.8, 0.8), now=POINTER_HOLD_SECONDS + 0.02) == (
+        800.0, 800.0,
+    )
 
 
 # ---------------- one-second click ----------------

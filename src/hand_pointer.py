@@ -9,7 +9,7 @@ import math
 import time
 
 from src import config
-from src.config import DWELL_SECONDS
+from src.config import DWELL_EDGE_TOLERANCE_PX, DWELL_GRACE_SECONDS, DWELL_SECONDS
 
 INDEX_TIP = 8
 
@@ -148,6 +148,19 @@ class DwellClicker:
         self._target = None       # button name being held now
         self._start = 0.0
         self._locked = None       # just clicked: leave the button before again
+        self._outside_since = None
+
+    @staticmethod
+    def _button(buttons, name):
+        return next((button for button in buttons if button.name == name), None)
+
+    @staticmethod
+    def _within_tolerance(point, button):
+        if point is None or button is None:
+            return False
+        dx = max(button.x - point[0], 0, point[0] - (button.x + button.w))
+        dy = max(button.y - point[1], 0, point[1] - (button.y + button.h))
+        return dx * dx + dy * dy <= DWELL_EDGE_TOLERANCE_PX ** 2
 
     def update(self, point, buttons, now):
         """Call once per frame. Returns the clicked button's name, or None."""
@@ -157,18 +170,57 @@ class DwellClicker:
                 hit = button.name
                 break
 
-        if hit != self._locked:
+        if self._locked is not None and hit == self._locked:
+            if self._outside_since is None:
+                return None
+            if now - self._outside_since <= DWELL_GRACE_SECONDS:
+                self._outside_since = None
+                return None
+            self._outside_since = None
             self._locked = None
+        elif self._locked is not None:
+            locked_button = self._button(buttons, self._locked)
+            if self._within_tolerance(point, locked_button):
+                if self._outside_since is None:
+                    self._outside_since = now
+                if now - self._outside_since <= DWELL_GRACE_SECONDS:
+                    return None
+            self._outside_since = None
+            self._locked = None
+
+        if self._target is not None:
+            if hit == self._target:
+                if (self._outside_since is not None
+                        and now - self._outside_since > DWELL_GRACE_SECONDS):
+                    self._target = None
+                self._outside_since = None
+            else:
+                target_button = self._button(buttons, self._target)
+                if self._within_tolerance(point, target_button):
+                    if self._outside_since is None:
+                        self._outside_since = now
+                    if now - self._outside_since <= DWELL_GRACE_SECONDS:
+                        if now - self._start >= self.dwell:
+                            self._locked = self._target
+                            clicked = self._target
+                            self._target = None
+                            self._outside_since = None
+                            return clicked
+                        return None
+                self._target = None
+                self._outside_since = None
+
         if hit is None or hit == self._locked:
-            self._target = None
             return None
 
         if hit != self._target:
             self._target = hit
             self._start = now
+        self._outside_since = None
         if now - self._start >= self.dwell:
             self._locked = hit
             self._target = None
+            self._outside_since = None
             return hit
         return None
 

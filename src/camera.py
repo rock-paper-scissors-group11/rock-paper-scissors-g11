@@ -41,10 +41,8 @@ class Camera:
                 except Exception:
                     pass
             try:
-                self.cap.set(
-                    cv2.CAP_PROP_FOURCC,
-                    cv2.VideoWriter_fourcc(*"MJPG"),
-                )
+                fourcc = cv2.VideoWriter_fourcc(*"MJPG")
+                self.cap.set(cv2.CAP_PROP_FOURCC, fourcc)
             except Exception:
                 pass
             return True
